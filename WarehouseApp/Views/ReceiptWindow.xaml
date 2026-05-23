@@ -1,0 +1,66 @@
+﻿<Window x:Class="WarehouseApp.Views.ReceiptWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="🧾 Чек об оплате"
+        Height="700" Width="550"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="White">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Border Grid.Row="0" Background="#4361EE" Padding="15">
+            <TextBlock Text="🧾 ЧЕК ОБ ОПЛАТЕ" FontSize="18" FontWeight="Bold" 
+                       Foreground="White" HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- Содержимое чека -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Border Padding="20">
+                <StackPanel x:Name="spReceiptContent"/>
+            </Border>
+        </ScrollViewer>
+
+        <!-- QR код и итого -->
+        <Border Grid.Row="2" Background="#F0F2F5" Padding="15" Margin="0,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- QR код -->
+                <Border Grid.Column="0" Background="White" Padding="10" Margin="0,0,15,0">
+                    <Image x:Name="imgQRCode" Width="120" Height="120" Stretch="Uniform"/>
+                </Border>
+
+                <!-- Итого -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="ИТОГО К ОПЛАТЕ:" FontSize="16" FontWeight="Bold" Foreground="#6C757D"/>
+                    <TextBlock x:Name="txtTotal" FontSize="28" FontWeight="Bold" Foreground="#DC3545"/>
+                    <TextBlock Text="Оплата по QR-коду" FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,15">
+            <Button Content="🖨️ Печать" Width="120" Height="40" 
+                    Background="#4361EE" Foreground="White" BorderThickness="0" Cursor="Hand" Margin="5"
+                    Click="Print_Click"/>
+            <Button Content="💾 Сохранить QR" Width="120" Height="40" 
+                    Background="#28A745" Foreground="White" BorderThickness="0" Cursor="Hand" Margin="5"
+                    Click="SaveQR_Click"/>
+            <Button Content="❌ Закрыть" Width="100" Height="40" 
+                    Background="#DC3545" Foreground="White" BorderThickness="0" Cursor="Hand" Margin="5"
+                    Click="Close_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

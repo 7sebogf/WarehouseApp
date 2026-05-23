@@ -1,0 +1,248 @@
+﻿<Window x:Class="WarehouseApp.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="🏢 Управление складом"
+        Height="800" Width="1400"
+        MinHeight="700" MinWidth="1200"
+        WindowStartupLocation="CenterScreen"
+        Background="#F0F2F5">
+
+    <Window.Resources>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#4361EE"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="5,0"/>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#E9ECEF"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="5,0"/>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button">
+            <Setter Property="Background" Value="#DC3545"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="SuccessButton" TargetType="Button">
+            <Setter Property="Background" Value="#28A745"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="WarningButton" TargetType="Button">
+            <Setter Property="Background" Value="#FF9800"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="InfoButton" TargetType="Button">
+            <Setter Property="Background" Value="#17A2B8"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="PurpleButton" TargetType="Button">
+            <Setter Property="Background" Value="#9C27B0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderBrush" Value="#DEE2E6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Width" Value="220"/>
+        </Style>
+
+        <Style x:Key="ModernComboBox" TargetType="ComboBox">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Margin" Value="5,0"/>
+        </Style>
+
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="8"/>
+        </Style>
+
+        <Style x:Key="ModernDataGrid" TargetType="DataGrid">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="AlternatingRowBackground" Value="#F8F9FA"/>
+            <Setter Property="RowHeight" Value="40"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="BorderBrush" Value="#E9ECEF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#4361EE" Padding="15,12">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="🏢" FontSize="24" Foreground="White" VerticalAlignment="Center"/>
+                    <TextBlock Text="Управление складом" FontSize="20" FontWeight="Bold" Foreground="White" 
+                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Border Background="White" Padding="10,5" Margin="0,0,15,0">
+                        <TextBlock x:Name="txtUserInfo" FontSize="13" Foreground="#4361EE" FontWeight="SemiBold"/>
+                    </Border>
+                    <Button Content="👤 Профиль" Style="{StaticResource SecondaryButton}" Background="#3A56D4" Foreground="White" Click="Profile_Click"/>
+                    <Button Content="🚪 Выход" Style="{StaticResource DangerButton}" Click="Logout_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="15,15,15,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="📦 Всего товаров" FontSize="12" Foreground="#6C757D"/>
+                    <TextBlock x:Name="txtTotalProducts" FontSize="28" FontWeight="Bold" Foreground="#4361EE"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="⚠️ Заканчиваются" FontSize="12" Foreground="#6C757D"/>
+                    <TextBlock x:Name="txtLowStock" FontSize="28" FontWeight="Bold" Foreground="#FFC107"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="❌ Нет в наличии" FontSize="12" Foreground="#6C757D"/>
+                    <TextBlock x:Name="txtOutOfStock" FontSize="28" FontWeight="Bold" Foreground="#DC3545"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="3" Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="💰 Общая стоимость" FontSize="12" Foreground="#6C757D"/>
+                    <TextBlock x:Name="txtTotalValue" FontSize="22" FontWeight="Bold" Foreground="#28A745"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Background="White" Margin="15" Padding="15">
+            <Grid>
+                <WrapPanel>
+                    <TextBox x:Name="txtSearch" Style="{StaticResource ModernTextBox}" 
+                             ToolTip="Поиск по названию, артикулу, сертификату"
+                             TextChanged="Search_TextChanged"/>
+
+                    <ComboBox x:Name="cmbCategory" Style="{StaticResource ModernComboBox}" 
+                              SelectionChanged="Filter_Changed" ToolTip="Фильтр по категории"/>
+
+                    <ComboBox x:Name="cmbStatus" Style="{StaticResource ModernComboBox}" 
+                              SelectionChanged="Filter_Changed" ToolTip="Фильтр по статусу"/>
+
+                    <ComboBox x:Name="cmbSortBy" Style="{StaticResource ModernComboBox}" 
+                              SelectionChanged="Sort_Changed" ToolTip="Сортировка">
+                        <ComboBoxItem Content="📝 Название" IsSelected="True"/>
+                        <ComboBoxItem Content="🔢 Артикул"/>
+                        <ComboBoxItem Content="📦 Количество"/>
+                        <ComboBoxItem Content="💰 Цена"/>
+                        <ComboBoxItem Content="⚖️ Вес"/>
+                    </ComboBox>
+
+                    <ComboBox x:Name="cmbSortOrder" Style="{StaticResource ModernComboBox}" 
+                              SelectionChanged="Sort_Changed" ToolTip="Порядок">
+                        <ComboBoxItem Content="▲ Возрастание" IsSelected="True"/>
+                        <ComboBoxItem Content="▼ Убывание"/>
+                    </ComboBox>
+
+                    <Button x:Name="btnRefresh" Content="🔄 Обновить" Style="{StaticResource SecondaryButton}" Click="Refresh_Click"/>
+                    <Button x:Name="btnExport" Content="📊 Экспорт" Style="{StaticResource SuccessButton}" Click="Export_Click"/>
+                    <Button x:Name="btnCertificate" Content="🔐 Сертификат" Style="{StaticResource PrimaryButton}" Background="#6C757D" Click="CertificateSearch_Click"/>
+                    <Button x:Name="btnAddProduct" Content="➕ Добавить" Style="{StaticResource SuccessButton}" Click="AddProduct_Click"/>
+                    <Button x:Name="btnDelete" Content="🗑️ Удалить" Style="{StaticResource DangerButton}" Click="DeleteProduct_Click" IsEnabled="False"/>
+                    <Button x:Name="btnOrder" Content="🛒 Заказ" Style="{StaticResource PrimaryButton}" Background="#28A745" Click="Order_Click"/>
+                    <Button x:Name="btnAIHelper" Content="🤖 AI Помощник" Style="{StaticResource PurpleButton}" Click="AIHelper_Click"/>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <DataGrid x:Name="dgProducts" Grid.Row="3" Style="{StaticResource ModernDataGrid}" 
+                  Margin="15,0,15,0" AutoGenerateColumns="False" SelectionChanged="DgProducts_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                <DataGridTextColumn Header="Название" Binding="{Binding Название}" Width="220"/>
+                <DataGridTextColumn Header="Артикул" Binding="{Binding Артикул}" Width="100"/>
+                <DataGridTextColumn Header="Категория" Binding="{Binding Категория}" Width="120"/>
+                <DataGridTextColumn Header="Вес (кг)" Binding="{Binding ВесКг}" Width="80"/>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Количество}" Width="90"/>
+                <DataGridTextColumn Header="Цена" Binding="{Binding Цена, StringFormat={}{0:C}}" Width="120"/>
+                <DataGridTextColumn Header="Сертификат" Binding="{Binding Сертификат}" Width="130"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding Статус}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Border Grid.Row="4" Background="White" Margin="15" Padding="12">
+            <Grid>
+                <TextBlock x:Name="txtRecordCount" FontSize="12" Foreground="#6C757D" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="btnEdit" Content="✏️ Редактировать" Style="{StaticResource WarningButton}" 
+                            Click="Edit_Click" IsEnabled="False"/>
+                    <Button x:Name="btnReplenishmentPlan" Content="📋 План пополнения" Style="{StaticResource InfoButton}" 
+                            Click="ReplenishmentPlan_Click"/>
+                    <Button x:Name="btnAwards" Content="🎖️ Мои награды" Style="{StaticResource PurpleButton}" 
+                            Click="Awards_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

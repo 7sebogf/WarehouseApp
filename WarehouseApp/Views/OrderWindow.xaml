@@ -1,0 +1,198 @@
+﻿<Window x:Class="WarehouseApp.Views.OrderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="🛒 Оформление заказа"
+        Height="700" Width="900"
+        MinHeight="600" MinWidth="800"
+        WindowStartupLocation="CenterOwner"
+        Background="#F0F2F5">
+
+    <Window.Resources>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#4361EE"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button">
+            <Setter Property="Background" Value="#DC3545"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="SuccessButton" TargetType="Button">
+            <Setter Property="Background" Value="#28A745"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="BorderBrush" Value="#DEE2E6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,3,0,10"/>
+        </Style>
+
+        <Style x:Key="ModernComboBox" TargetType="ComboBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,3,0,10"/>
+        </Style>
+
+        <Style x:Key="CartItemStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Левая панель - Выбор товара -->
+        <Border Grid.Column="0" Background="White" Margin="10" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="📦 Выбор товара" FontSize="18" FontWeight="Bold" 
+                           Foreground="#4361EE" Margin="0,0,0,15"/>
+
+                <TextBox x:Name="txtSearch" Grid.Row="1" Style="{StaticResource ModernTextBox}" 
+                         TextChanged="txtSearch_TextChanged" ToolTip="Поиск товара"/>
+
+                <ComboBox x:Name="cmbCategoryFilter" Grid.Row="2" Style="{StaticResource ModernComboBox}"
+                          SelectionChanged="cmbCategoryFilter_SelectionChanged" Margin="0,5,0,10"/>
+
+                <DataGrid x:Name="dgProducts" Grid.Row="3" AutoGenerateColumns="False" 
+                          SelectionChanged="dgProducts_SelectionChanged" Margin="0,10,0,10"
+                          RowHeight="40" FontSize="12" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Название" Binding="{Binding Название}" Width="*"/>
+                        <DataGridTextColumn Header="Цена" Binding="{Binding Цена, StringFormat={}{0:C}}" Width="80"/>
+                        <DataGridTextColumn Header="В наличии" Binding="{Binding Количество}" Width="70"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="4" Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Количество:" FontSize="12" Foreground="#6C757D"/>
+                        <TextBox x:Name="txtQuantity" Text="1" Width="80" Height="30" 
+                                 TextAlignment="Center" Margin="0,3,0,0"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Content="➕ Добавить в заказ" 
+                            Style="{StaticResource ActionButton}" Background="#28A745"
+                            Click="AddToCart_Click" x:Name="btnAddToCart" IsEnabled="False"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Правая панель - Корзина -->
+        <Border Grid.Column="1" Background="White" Margin="0,10,10,10" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="🛒 Корзина" FontSize="18" FontWeight="Bold" 
+                           Foreground="#4361EE" Margin="0,0,0,15"/>
+
+                <ListBox x:Name="lstCart" Grid.Row="1" Margin="0,0,0,10">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CartItemStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Quantity}" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Price, StringFormat={}{0:C}}" HorizontalAlignment="Right"/>
+                                    <Button Grid.Column="3" Content="❌" Background="Transparent" 
+                                            BorderThickness="0" Foreground="#DC3545" Cursor="Hand"
+                                            Click="RemoveFromCart_Click" Tag="{Binding}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Grid.Row="2" Background="#E9ECEF" Padding="15" Margin="0,5,0,5">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Итого:" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock x:Name="txtTotal" Grid.Column="1" FontSize="20" FontWeight="Bold" Foreground="#28A745"/>
+                    </Grid>
+                </Border>
+
+                <GroupBox Grid.Row="3" Header="👤 Данные получателя" Margin="0,10,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="ФИО*" FontSize="12" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                        <TextBox x:Name="txtCustomerName" Style="{StaticResource ModernTextBox}" Height="30"/>
+
+                        <TextBlock Text="Телефон*" FontSize="12" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                        <TextBox x:Name="txtCustomerPhone" Style="{StaticResource ModernTextBox}" Height="30"/>
+
+                        <TextBlock Text="Адрес доставки*" FontSize="12" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                        <TextBox x:Name="txtCustomerAddress" Style="{StaticResource ModernTextBox}" Height="30"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Grid.Row="4" Header="💳 Способ оплаты" Margin="0,10,0,10">
+                    <StackPanel Margin="10">
+                        <RadioButton x:Name="rbCard" Content="💳 Банковская карта" IsChecked="True" Margin="0,5"/>
+                        <RadioButton x:Name="rbCash" Content="💰 Наличные" Margin="0,5"/>
+                        <RadioButton x:Name="rbOnline" Content="🏦 Онлайн перевод" Margin="0,5"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                    <Button Content="🗑️ Очистить корзину" Style="{StaticResource DangerButton}" 
+                            Click="ClearCart_Click"/>
+                    <Button Content="✅ Оформить заказ" Style="{StaticResource SuccessButton}" 
+                            Click="SubmitOrder_Click"/>
+                    <Button Content="❌ Отмена" Style="{StaticResource ActionButton}" 
+                            Background="#6C757D" Click="Cancel_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
