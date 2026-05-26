@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable disable
+
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,10 +15,10 @@ namespace WarehouseApp.Views
     public partial class AIHelperWindow : Window
     {
         private readonly DatabaseHelper _db;
-        private readonly UserModel _currentUser;
+        private readonly User _currentUser;  // ← User, не UserModel
         private readonly bool _hasAISubscription;
 
-        public AIHelperWindow(UserModel user)
+        public AIHelperWindow(User user)  // ← User, не UserModel
         {
             InitializeComponent();
             _db = new DatabaseHelper();
@@ -33,7 +35,6 @@ namespace WarehouseApp.Views
                           "3. Стоимость подписки: 100 баллов\n\n" +
                           $"⭐ Ваш баланс: {user.Points} баллов", false);
 
-                // Блокируем все кнопки
                 btnAnalyzeStock.IsEnabled = false;
                 btnRecommendReplenishment.IsEnabled = false;
                 btnFindAlternatives.IsEnabled = false;

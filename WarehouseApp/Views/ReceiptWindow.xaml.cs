@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable disable
+
+using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;

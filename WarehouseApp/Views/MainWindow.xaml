@@ -17,6 +17,20 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3A56D4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="SecondaryButton" TargetType="Button">
@@ -95,6 +109,7 @@
             <Setter Property="Background" Value="White"/>
             <Setter Property="Padding" Value="15"/>
             <Setter Property="Margin" Value="8"/>
+            <Setter Property="CornerRadius" Value="10"/>
         </Style>
 
         <Style x:Key="ModernDataGrid" TargetType="DataGrid">
@@ -109,7 +124,6 @@
             <Setter Property="SelectionUnit" Value="FullRow"/>
             <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
         </Style>
     </Window.Resources>
 
@@ -122,6 +136,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Шапка -->
         <Border Grid.Row="0" Background="#4361EE" Padding="15,12">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -129,9 +144,8 @@
                     <TextBlock Text="Управление складом" FontSize="20" FontWeight="Bold" Foreground="White" 
                                VerticalAlignment="Center" Margin="10,0,0,0"/>
                 </StackPanel>
-
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Border Background="White" Padding="10,5" Margin="0,0,15,0">
+                    <Border Background="White" Padding="10,5" Margin="0,0,15,0" CornerRadius="20">
                         <TextBlock x:Name="txtUserInfo" FontSize="13" Foreground="#4361EE" FontWeight="SemiBold"/>
                     </Border>
                     <Button Content="👤 Профиль" Style="{StaticResource SecondaryButton}" Background="#3A56D4" Foreground="White" Click="Profile_Click"/>
@@ -140,6 +154,7 @@
             </Grid>
         </Border>
 
+        <!-- Статистика -->
         <Grid Grid.Row="1" Margin="15,15,15,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -177,61 +192,47 @@
             </Border>
         </Grid>
 
-        <Border Grid.Row="2" Background="White" Margin="15" Padding="15">
-            <Grid>
-                <WrapPanel>
-                    <TextBox x:Name="txtSearch" Style="{StaticResource ModernTextBox}" 
-                             ToolTip="Поиск по названию, артикулу, сертификату"
-                             TextChanged="Search_TextChanged"/>
+        <!-- Панель фильтров -->
+        <Border Grid.Row="2" Background="White" Margin="15" Padding="15" CornerRadius="10">
+            <WrapPanel>
+                <TextBox x:Name="txtSearch" Style="{StaticResource ModernTextBox}" 
+                         TextChanged="Search_TextChanged"
+                         ToolTip="Поиск по названию"/>
 
-                    <ComboBox x:Name="cmbCategory" Style="{StaticResource ModernComboBox}" 
-                              SelectionChanged="Filter_Changed" ToolTip="Фильтр по категории"/>
+                <ComboBox x:Name="cmbCategory" Style="{StaticResource ModernComboBox}" 
+                          SelectionChanged="Filter_Changed" ToolTip="Фильтр по категории"/>
 
-                    <ComboBox x:Name="cmbStatus" Style="{StaticResource ModernComboBox}" 
-                              SelectionChanged="Filter_Changed" ToolTip="Фильтр по статусу"/>
+                <ComboBox x:Name="cmbStatus" Style="{StaticResource ModernComboBox}" 
+                          SelectionChanged="Filter_Changed" ToolTip="Фильтр по статусу"/>
 
-                    <ComboBox x:Name="cmbSortBy" Style="{StaticResource ModernComboBox}" 
-                              SelectionChanged="Sort_Changed" ToolTip="Сортировка">
-                        <ComboBoxItem Content="📝 Название" IsSelected="True"/>
-                        <ComboBoxItem Content="🔢 Артикул"/>
-                        <ComboBoxItem Content="📦 Количество"/>
-                        <ComboBoxItem Content="💰 Цена"/>
-                        <ComboBoxItem Content="⚖️ Вес"/>
-                    </ComboBox>
-
-                    <ComboBox x:Name="cmbSortOrder" Style="{StaticResource ModernComboBox}" 
-                              SelectionChanged="Sort_Changed" ToolTip="Порядок">
-                        <ComboBoxItem Content="▲ Возрастание" IsSelected="True"/>
-                        <ComboBoxItem Content="▼ Убывание"/>
-                    </ComboBox>
-
-                    <Button x:Name="btnRefresh" Content="🔄 Обновить" Style="{StaticResource SecondaryButton}" Click="Refresh_Click"/>
-                    <Button x:Name="btnExport" Content="📊 Экспорт" Style="{StaticResource SuccessButton}" Click="Export_Click"/>
-                    <Button x:Name="btnCertificate" Content="🔐 Сертификат" Style="{StaticResource PrimaryButton}" Background="#6C757D" Click="CertificateSearch_Click"/>
-                    <Button x:Name="btnAddProduct" Content="➕ Добавить" Style="{StaticResource SuccessButton}" Click="AddProduct_Click"/>
-                    <Button x:Name="btnDelete" Content="🗑️ Удалить" Style="{StaticResource DangerButton}" Click="DeleteProduct_Click" IsEnabled="False"/>
-                    <Button x:Name="btnOrder" Content="🛒 Заказ" Style="{StaticResource PrimaryButton}" Background="#28A745" Click="Order_Click"/>
-                    <Button x:Name="btnAIHelper" Content="🤖 AI Помощник" Style="{StaticResource PurpleButton}" Click="AIHelper_Click"/>
-                </WrapPanel>
-            </Grid>
+                <Button x:Name="btnRefresh" Content="🔄 Обновить" Style="{StaticResource SecondaryButton}" Click="Refresh_Click"/>
+                <Button x:Name="btnExport" Content="📊 Экспорт" Style="{StaticResource SuccessButton}" Click="Export_Click"/>
+                <Button x:Name="btnCertificate" Content="🔐 Сертификат" Style="{StaticResource PrimaryButton}" Background="#6C757D" Click="CertificateSearch_Click"/>
+                <Button x:Name="btnAddProduct" Content="➕ Добавить" Style="{StaticResource SuccessButton}" Click="AddProduct_Click"/>
+                <Button x:Name="btnDelete" Content="🗑️ Удалить" Style="{StaticResource DangerButton}" Click="DeleteProduct_Click" IsEnabled="False"/>
+                <Button x:Name="btnOrder" Content="🛒 Заказ" Style="{StaticResource PrimaryButton}" Background="#28A745" Click="Order_Click"/>
+                <Button x:Name="btnAIHelper" Content="🤖 AI Помощник" Style="{StaticResource PurpleButton}" Click="AIHelper_Click"/>
+            </WrapPanel>
         </Border>
 
+        <!-- Таблица товаров -->
         <DataGrid x:Name="dgProducts" Grid.Row="3" Style="{StaticResource ModernDataGrid}" 
-                  Margin="15,0,15,0" AutoGenerateColumns="False" SelectionChanged="DgProducts_SelectionChanged">
+                  Margin="15,0,15,0" AutoGenerateColumns="False" SelectionChanged="dgProducts_SelectionChanged">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                <DataGridTextColumn Header="Название" Binding="{Binding Название}" Width="220"/>
-                <DataGridTextColumn Header="Артикул" Binding="{Binding Артикул}" Width="100"/>
-                <DataGridTextColumn Header="Категория" Binding="{Binding Категория}" Width="120"/>
-                <DataGridTextColumn Header="Вес (кг)" Binding="{Binding ВесКг}" Width="80"/>
-                <DataGridTextColumn Header="Количество" Binding="{Binding Количество}" Width="90"/>
-                <DataGridTextColumn Header="Цена" Binding="{Binding Цена, StringFormat={}{0:C}}" Width="120"/>
-                <DataGridTextColumn Header="Сертификат" Binding="{Binding Сертификат}" Width="130"/>
-                <DataGridTextColumn Header="Статус" Binding="{Binding Статус}" Width="100"/>
+                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="220"/>
+                <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="100"/>
+                <DataGridTextColumn Header="Категория" Binding="{Binding Category.Name}" Width="120"/>
+                <DataGridTextColumn Header="Вес (кг)" Binding="{Binding Weight}" Width="80"/>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="90"/>
+                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:C}}" Width="120"/>
+                <DataGridTextColumn Header="Сертификат" Binding="{Binding CertificateCode}" Width="130"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding Status.Name}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
 
-        <Border Grid.Row="4" Background="White" Margin="15" Padding="12">
+        <!-- Нижняя панель -->
+        <Border Grid.Row="4" Background="White" Margin="15" Padding="12" CornerRadius="10">
             <Grid>
                 <TextBlock x:Name="txtRecordCount" FontSize="12" Foreground="#6C757D" VerticalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

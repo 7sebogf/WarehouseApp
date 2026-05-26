@@ -1,6 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
+﻿#nullable disable
+
 using System;
-using System.Data;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using WarehouseApp.Database;
@@ -11,11 +12,10 @@ namespace WarehouseApp.Views
     public partial class ProfileWindow : Window
     {
         private readonly DatabaseHelper _db;
-        private readonly UserModel _currentUser;
-        private DataTable _ordersTable;
+        private readonly User _currentUser;
         private int _selectedOrderId;
 
-        public ProfileWindow(UserModel user)
+        public ProfileWindow(User user)
         {
             InitializeComponent();
             _db = new DatabaseHelper();
@@ -31,6 +31,7 @@ namespace WarehouseApp.Views
             txtFullName.Text = _currentUser.FullName;
             txtLogin.Text = _currentUser.Login;
             txtRole.Text = _currentUser.Role == "Admin" ? "Администратор" : (_currentUser.Role == "Manager" ? "Менеджер" : "Пользователь");
+            // txtPoints.Text = _currentUser.Points.ToString();  // ← закомментировано или удалено
             txtEmail.Text = string.IsNullOrEmpty(_currentUser.Email) ? "не указан" : _currentUser.Email;
             txtPhone.Text = string.IsNullOrEmpty(_currentUser.Phone) ? "не указан" : _currentUser.Phone;
             txtGender.Text = string.IsNullOrEmpty(_currentUser.Gender) ? "не указан" : _currentUser.Gender;
@@ -51,7 +52,7 @@ namespace WarehouseApp.Views
             }
             else
             {
-                txtAISubscription.Text = "❌ Нет активной подписки. Подключите нейросеть для аналитики склада.";
+                txtAISubscription.Text = "❌ Нет активной подписки. Подключите нейросеть за 100 баллов.";
                 btnSubscribe.Visibility = Visibility.Visible;
             }
         }
@@ -60,9 +61,9 @@ namespace WarehouseApp.Views
         {
             try
             {
-                _ordersTable = _db.GetUserOrders(_currentUser.Id);
-                dgOrders.ItemsSource = _ordersTable.DefaultView;
-                txtOrdersCount.Text = _ordersTable?.Rows.Count.ToString() ?? "0";
+                var orders = _db.GetUserOrders(_currentUser.Id);
+                dgOrders.ItemsSource = orders;
+                txtOrdersCount.Text = orders.Count.ToString();
             }
             catch (Exception ex)
             {
@@ -85,24 +86,28 @@ namespace WarehouseApp.Views
 
         private void DgOrders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (dgOrders.SelectedItem is DataRowView row)
+            if (dgOrders.SelectedItem is Order order)
             {
-                _selectedOrderId = Convert.ToInt32(row["Id"]);
+                _selectedOrderId = order.Id;
                 btnShowReceipt.IsEnabled = true;
 
-                var details = _db.GetOrderDetails(_selectedOrderId);
+                var items = _db.GetOrderDetails(_selectedOrderId);
                 string detailsText = "";
 
-                if (details != null && details.Rows.Count > 0)
+                if (items != null && items.Count > 0)
                 {
-                    foreach (DataRow item in details.Rows)
+                    foreach (var item in items)
                     {
-                        detailsText += $"📦 {item["ProductName"]} - {item["Quantity"]} шт x {Convert.ToDecimal(item["Price"]):C} = {Convert.ToDecimal(item["Total"]):C}\n";
+                        detailsText += $"📦 {item.ProductName}\n";
+                        detailsText += $"   Количество: {item.Quantity} шт, Цена: {item.Price:C}, Сумма: {item.Total:C}\n\n";
                     }
                 }
                 else
                 {
-                    detailsText = $"Номер заказа: {row["OrderNumber"]}\nСумма: {Convert.ToDecimal(row["TotalAmount"]):C}";
+                    detailsText = $"Номер заказа: {order.OrderNumber}\n";
+                    detailsText += $"Дата: {order.OrderDate:dd.MM.yyyy HH:mm}\n";
+                    detailsText += $"Сумма: {order.TotalAmount:C}\n";
+                    detailsText += $"Статус: {order.Status}\n";
                 }
                 txtOrderDetails.Text = detailsText;
             }
@@ -117,46 +122,43 @@ namespace WarehouseApp.Views
         {
             if (_selectedOrderId > 0)
             {
-                var orderInfo = _db.GetOrderInfo(_selectedOrderId);
-                if (orderInfo != null)
+                var order = _db.GetOrderInfo(_selectedOrderId);
+                if (order != null)
                 {
-                    string orderDetails = $"Заказ от {Convert.ToDateTime(orderInfo["OrderDate"]):dd.MM.yyyy HH:mm}\n";
-                    orderDetails += $"Номер заказа: {orderInfo["OrderNumber"]}\n";
-                    orderDetails += $"Получатель: {orderInfo["CustomerName"]}\n";
-                    orderDetails += $"Телефон: {orderInfo["CustomerPhone"]}\n";
-                    orderDetails += $"Адрес: {orderInfo["CustomerAddress"]}\n";
-                    orderDetails += $"Оплата: {orderInfo["PaymentMethod"]}\n\nТовары:\n";
+                    string orderDetails = $"Заказ от {order.OrderDate:dd.MM.yyyy HH:mm}\n";
+                    orderDetails += $"Номер заказа: {order.OrderNumber}\n";
+                    orderDetails += $"Получатель: {order.CustomerName}\n";
+                    orderDetails += $"Телефон: {order.CustomerPhone}\n";
+                    orderDetails += $"Адрес: {order.CustomerAddress}\n";
+                    orderDetails += $"Оплата: {order.PaymentMethod}\n\n";
+                    orderDetails += "Товары:\n";
 
                     var items = _db.GetOrderDetails(_selectedOrderId);
-                    foreach (DataRow item in items.Rows)
+                    foreach (var item in items)
                     {
-                        orderDetails += $"  • {item["ProductName"]} - {item["Quantity"]} шт x {Convert.ToDecimal(item["Price"]):C} = {Convert.ToDecimal(item["Total"]):C}\n";
+                        orderDetails += $"  • {item.ProductName} - {item.Quantity} шт x {item.Price:C} = {item.Total:C}\n";
                     }
 
-                    decimal total = Convert.ToDecimal(orderInfo["TotalAmount"]);
-                    var receiptWindow = new ReceiptWindow(orderDetails, total);
+                    var receiptWindow = new ReceiptWindow(orderDetails, order.TotalAmount);
                     receiptWindow.ShowDialog();
                 }
             }
         }
 
+        private void RefreshOrders_Click(object sender, RoutedEventArgs e)
+        {
+            LoadOrders();
+            MessageBox.Show("Список заказов обновлен!", "Обновление",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private void Subscribe_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentUser == null) return;
-
-            // ========== ВАЛИДАЦИЯ БАЛЛОВ ==========
             if (_currentUser.Points >= 100)
             {
                 var result = MessageBox.Show(
-                    "🤖 **Подключить подписку на нейросеть?**\n\n" +
-                    "💰 Стоимость: 100 баллов\n\n" +
-                    "📊 Возможности:\n" +
-                    "• Прогнозирование спроса\n" +
-                    "• Оптимизация закупок\n" +
-                    "• Аналитика склада\n" +
-                    "• Рекомендации товаров\n\n" +
-                    $"⭐ Ваш баланс: {_currentUser.Points} баллов\n\n" +
-                    "После подключения AI помощник станет доступен!",
+                    "Подключить подписку на нейросеть?\nСтоимость: 100 баллов\n\n" +
+                    "Возможности:\n• Прогнозирование спроса\n• Оптимизация закупок\n• Аналитика склада",
                     "Подписка на нейросеть",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
@@ -165,38 +167,20 @@ namespace WarehouseApp.Views
                 {
                     _currentUser.Points -= 100;
                     _currentUser.IsSubscribedToAI = true;
-
-                    using var conn = _db.GetConnection();
-                    conn.Open();
-                    string query = "UPDATE Users SET IsSubscribedToAI = 1, Points = @points WHERE Id = @id";
-                    using var cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@points", _currentUser.Points);
-                    cmd.Parameters.AddWithValue("@id", _currentUser.Id);
-                    cmd.ExecuteNonQuery();
-
+                    _db.AddUserPoints(_currentUser.Id, -100);
                     _db.LogAction(_currentUser.Id, "Подписка", "Подключена подписка на нейросеть");
 
                     LoadProfile();
                     LoadAwards();
 
-                    MessageBox.Show("✅ **Подписка на нейросеть активирована!**\n\n" +
-                                   "Теперь вам доступен AI помощник в главном меню.",
-                                   "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("✅ Подписка на нейросеть активирована!", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             else
             {
-                int needed = 100 - _currentUser.Points;
-                MessageBox.Show($"❌ **Недостаточно баллов!**\n\n" +
-                               $"💰 Нужно: 100 баллов\n" +
-                               $"⭐ У вас: {_currentUser.Points} баллов\n" +
-                               $"📉 Не хватает: {needed} баллов\n\n" +
-                               "💡 **Как получить баллы:**\n" +
-                               "• Добавление товара +5 баллов\n" +
-                               "• Редактирование товара +3 балла\n" +
-                               "• Удаление товара +2 балла\n" +
-                               "• Оформление заказа +10 баллов",
-                               "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Недостаточно баллов! Нужно 100 баллов.\nУ вас: {_currentUser.Points} баллов",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -219,7 +203,6 @@ namespace WarehouseApp.Views
             profilePanel.Visibility = Visibility.Collapsed;
             ordersPanel.Visibility = Visibility.Visible;
             awardsPanel.Visibility = Visibility.Collapsed;
-            LoadOrders();
 
             btnOrdersTab.BorderBrush = System.Windows.Media.Brushes.LightBlue;
             btnOrdersTab.Foreground = System.Windows.Media.Brushes.LightBlue;

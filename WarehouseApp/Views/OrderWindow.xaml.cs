@@ -1,8 +1,8 @@
-﻿using System;
+﻿#nullable disable
+
+using System;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using WarehouseApp.Database;
@@ -14,7 +14,6 @@ namespace WarehouseApp.Views
     {
         private readonly DatabaseHelper _db;
         private readonly int _userId;
-        private DataTable _productsTable;
         private ObservableCollection<CartItem> _cart;
 
         public OrderWindow(int userId)
@@ -45,27 +44,19 @@ namespace WarehouseApp.Views
         {
             var categories = _db.GetCategories();
             cmbCategoryFilter.ItemsSource = categories;
-            cmbCategoryFilter.SelectedIndex = 0;
+            if (categories.Count > 0) cmbCategoryFilter.SelectedIndex = 0;
         }
 
         private void LoadProducts()
         {
-            string searchText = txtSearch.Text ?? "";
+            string searchText = txtSearch?.Text ?? "";
             string category = cmbCategoryFilter.SelectedItem?.ToString() ?? "Все";
-
-            _productsTable = _db.GetProducts(searchText, category, "Все", "Название", "ASC");
-            dgProducts.ItemsSource = _productsTable.DefaultView;
+            var products = _db.GetProducts(searchText, category, "", "Название", "ASC");
+            dgProducts.ItemsSource = products;
         }
 
-        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            LoadProducts();
-        }
-
-        private void cmbCategoryFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            LoadProducts();
-        }
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) => LoadProducts();
+        private void cmbCategoryFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) => LoadProducts();
 
         private void dgProducts_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -74,63 +65,34 @@ namespace WarehouseApp.Views
 
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
-            if (dgProducts.SelectedItem is DataRowView row)
+            if (dgProducts.SelectedItem is Product product)
             {
-                int productId = Convert.ToInt32(row["Id"]);
-                string name = row["Название"].ToString() ?? string.Empty;
-                decimal price = Convert.ToDecimal(row["Цена"]);
-                int available = Convert.ToInt32(row["Количество"]);
-
-                if (!int.TryParse(txtQuantity.Text, out int quantity) || quantity < 1)
+                if (!int.TryParse(txtQuantity.Text, out int qty) || qty < 1)
                 {
-                    MessageBox.Show("❌ Введите корректное количество (минимум 1)!", "Ошибка валидации",
+                    MessageBox.Show("Введите корректное количество!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (qty > product.Quantity)
+                {
+                    MessageBox.Show($"Недостаточно товара! Доступно: {product.Quantity} шт", "Ошибка",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
-                    txtQuantity.Focus();
-                    txtQuantity.SelectAll();
                     return;
                 }
 
-                if (quantity > 999)
-                {
-                    MessageBox.Show("❌ Количество не может превышать 999!", "Ошибка валидации",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    txtQuantity.Focus();
-                    txtQuantity.SelectAll();
-                    return;
-                }
-
-                if (quantity > available)
-                {
-                    MessageBox.Show($"❌ Недостаточно товара! Доступно: {available} шт", "Ошибка",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    txtQuantity.Focus();
-                    return;
-                }
-
-                var existingItem = _cart.FirstOrDefault(x => x.ProductId == productId);
-                if (existingItem != null)
-                {
-                    if (existingItem.Quantity + quantity > available)
-                    {
-                        MessageBox.Show($"❌ Недостаточно товара! Доступно: {available} шт", "Ошибка",
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                    existingItem.Quantity += quantity;
-                }
+                var existing = _cart.FirstOrDefault(x => x.ProductId == product.Id);
+                if (existing != null)
+                    existing.Quantity += qty;
                 else
-                {
                     _cart.Add(new CartItem
                     {
-                        ProductId = productId,
-                        Name = name,
-                        Price = price,
-                        Quantity = quantity
+                        ProductId = product.Id,
+                        Name = product.Name,
+                        Price = product.Price,
+                        Quantity = qty
                     });
-                }
 
-                txtQuantity.Text = "1";
                 UpdateTotal();
+                txtQuantity.Text = "1";
             }
         }
 
@@ -145,157 +107,56 @@ namespace WarehouseApp.Views
 
         private void ClearCart_Click(object sender, RoutedEventArgs e)
         {
-            if (_cart.Count > 0)
+            if (_cart.Count > 0 && MessageBox.Show("Очистить корзину?", "Подтверждение",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                var result = MessageBox.Show("Очистить корзину?", "Подтверждение",
-                    MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    _cart.Clear();
-                    UpdateTotal();
-                }
+                _cart.Clear();
+                UpdateTotal();
             }
         }
 
         private void UpdateTotal()
         {
-            decimal total = _cart.Sum(x => x.Total);
-            txtTotal.Text = total.ToString("C");
+            txtTotal.Text = _cart.Sum(x => x.Total).ToString("C");
         }
 
         private void SubmitOrder_Click(object sender, RoutedEventArgs e)
         {
-            // ========== ВАЛИДАЦИЯ КОРЗИНЫ ==========
             if (_cart.Count == 0)
             {
-                MessageBox.Show("❌ Корзина пуста! Добавьте товары.", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Корзина пуста!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
-            // ========== ВАЛИДАЦИЯ ФИО ==========
-            if (string.IsNullOrWhiteSpace(txtCustomerName.Text))
+            if (string.IsNullOrWhiteSpace(txtCustomerName.Text) ||
+                string.IsNullOrWhiteSpace(txtCustomerPhone.Text) ||
+                string.IsNullOrWhiteSpace(txtCustomerAddress.Text))
             {
-                MessageBox.Show("❌ Введите ФИО получателя!", "Ошибка валидации",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                txtCustomerName.Focus();
+                MessageBox.Show("Заполните все данные получателя!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (txtCustomerName.Text.Length < 5)
-            {
-                MessageBox.Show("❌ Введите полное ФИО (минимум 5 символов)!", "Ошибка валидации",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                txtCustomerName.Focus();
-                return;
-            }
-
-            // ========== ВАЛИДАЦИЯ ТЕЛЕФОНА ==========
-            if (string.IsNullOrWhiteSpace(txtCustomerPhone.Text))
-            {
-                MessageBox.Show("❌ Введите номер телефона!", "Ошибка валидации",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                txtCustomerPhone.Focus();
-                return;
-            }
-
-            string cleanPhone = txtCustomerPhone.Text.Replace("+", "").Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
-            if (!Regex.IsMatch(cleanPhone, @"^\d{10,11}$"))
-            {
-                MessageBox.Show("❌ Введите корректный номер телефона (10-11 цифр)!", "Ошибка валидации",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                txtCustomerPhone.Focus();
-                txtCustomerPhone.SelectAll();
-                return;
-            }
-
-            // ========== ВАЛИДАЦИЯ АДРЕСА ==========
-            if (string.IsNullOrWhiteSpace(txtCustomerAddress.Text))
-            {
-                MessageBox.Show("❌ Введите адрес доставки!", "Ошибка валидации",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                txtCustomerAddress.Focus();
-                return;
-            }
-
-            if (txtCustomerAddress.Text.Length < 10)
-            {
-                MessageBox.Show("❌ Введите полный адрес (минимум 10 символов)!", "Ошибка валидации",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                txtCustomerAddress.Focus();
-                return;
-            }
-
-            string paymentMethod = "";
-            if (rbCard.IsChecked == true) paymentMethod = "Банковская карта";
-            else if (rbCash.IsChecked == true) paymentMethod = "Наличные";
-            else if (rbOnline.IsChecked == true) paymentMethod = "Онлайн перевод";
+            string payment = rbCard.IsChecked == true ? "Банковская карта" :
+                            rbCash.IsChecked == true ? "Наличные" : "Онлайн перевод";
 
             decimal total = _cart.Sum(x => x.Total);
-
-            string orderDetails = $"Заказ от {DateTime.Now:dd.MM.yyyy HH:mm}\n";
-            orderDetails += $"Получатель: {txtCustomerName.Text}\n";
-            orderDetails += $"Телефон: {txtCustomerPhone.Text}\n";
-            orderDetails += $"Адрес: {txtCustomerAddress.Text}\n";
-            orderDetails += $"Оплата: {paymentMethod}\n\n";
-            orderDetails += "Товары:\n";
+            string details = string.Join("\n", _cart.Select(x => $"{x.Name} - {x.Quantity} шт x {x.Price:C} = {x.Total:C}"));
 
             foreach (var item in _cart)
             {
-                orderDetails += $"  • {item.Name} - {item.Quantity} шт x {item.Price:C} = {item.Total:C}\n";
+                _db.UpdateProductQuantity(item.ProductId, -item.Quantity);
             }
 
-            orderDetails += $"\nИТОГО: {total:C}";
+            _db.SaveOrder(_userId, details, total, payment,
+                txtCustomerName.Text, txtCustomerPhone.Text, txtCustomerAddress.Text, _cart.ToList());
 
-            _db.LogAction(_userId, "Оформление заказа", orderDetails);
+            MessageBox.Show($"✅ ЗАКАЗ ОФОРМЛЕН!\nСумма: {total:C}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            bool allSuccess = true;
-            string errorMessage = "";
+            // Показываем чек
+            var receipt = new ReceiptWindow(details, total);
+            receipt.ShowDialog();
 
-            foreach (var item in _cart)
-            {
-                bool success = _db.UpdateProductQuantity(item.ProductId, -item.Quantity);
-                if (!success)
-                {
-                    allSuccess = false;
-                    errorMessage = $"❌ Ошибка при списании товара: {item.Name}";
-                    break;
-                }
-                _db.UpdateProductStatus(item.ProductId);
-            }
-
-            if (allSuccess)
-            {
-                _db.SaveOrder(_userId, orderDetails, total, paymentMethod,
-                              txtCustomerName.Text, txtCustomerPhone.Text, txtCustomerAddress.Text, _cart.ToList());
-
-                MessageBox.Show(
-                    $"✅ ЗАКАЗ ОФОРМЛЕН!\n\n" +
-                    $"Номер заказа: #{DateTime.Now:yyyyMMddHHmmss}\n" +
-                    $"Сумма: {total:C}\n" +
-                    $"Способ оплаты: {paymentMethod}",
-                    "Заказ оформлен",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-
-                var receiptWindow = new ReceiptWindow(orderDetails, total);
-                receiptWindow.ShowDialog();
-
-                int pointsToAdd = (int)(total / 1000);
-                if (pointsToAdd > 0)
-                {
-                    _db.AddUserPoints(_userId, pointsToAdd);
-                    _db.LogAction(_userId, "Награда", $"Получено {pointsToAdd} баллов за заказ на сумму {total:C}");
-                }
-
-                DialogResult = true;
-                Close();
-            }
-            else
-            {
-                MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            DialogResult = true;
+            Close();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

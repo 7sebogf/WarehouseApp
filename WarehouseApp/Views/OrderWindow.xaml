@@ -13,7 +13,7 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Padding" Value="12,8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="5"/>
@@ -23,7 +23,7 @@
             <Setter Property="Background" Value="#DC3545"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Padding" Value="12,8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
@@ -32,7 +32,7 @@
             <Setter Property="Background" Value="#28A745"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Padding" Value="12,8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
@@ -51,12 +51,6 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Margin" Value="0,3,0,10"/>
         </Style>
-
-        <Style x:Key="CartItemStyle" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
-            <Setter Property="Padding" Value="10"/>
-        </Style>
     </Window.Resources>
 
     <Grid>
@@ -65,8 +59,8 @@
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Левая панель - Выбор товара -->
-        <Border Grid.Column="0" Background="White" Margin="10" Padding="15">
+        <!-- Левая панель - выбор товара -->
+        <Border Grid.Column="0" Background="White" Margin="10" Padding="15" CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -76,22 +70,23 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="📦 Выбор товара" FontSize="18" FontWeight="Bold" 
+                <TextBlock Grid.Row="0" Text="📦 ВЫБОР ТОВАРА" FontSize="18" FontWeight="Bold" 
                            Foreground="#4361EE" Margin="0,0,0,15"/>
 
                 <TextBox x:Name="txtSearch" Grid.Row="1" Style="{StaticResource ModernTextBox}" 
                          TextChanged="txtSearch_TextChanged" ToolTip="Поиск товара"/>
 
                 <ComboBox x:Name="cmbCategoryFilter" Grid.Row="2" Style="{StaticResource ModernComboBox}"
-                          SelectionChanged="cmbCategoryFilter_SelectionChanged" Margin="0,5,0,10"/>
+                          SelectionChanged="cmbCategoryFilter_SelectionChanged" Margin="0,5,0,10"
+                          DisplayMemberPath="Name"/>
 
                 <DataGrid x:Name="dgProducts" Grid.Row="3" AutoGenerateColumns="False" 
                           SelectionChanged="dgProducts_SelectionChanged" Margin="0,10,0,10"
                           RowHeight="40" FontSize="12" IsReadOnly="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Название" Binding="{Binding Название}" Width="*"/>
-                        <DataGridTextColumn Header="Цена" Binding="{Binding Цена, StringFormat={}{0:C}}" Width="80"/>
-                        <DataGridTextColumn Header="В наличии" Binding="{Binding Количество}" Width="70"/>
+                        <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:C}}" Width="80"/>
+                        <DataGridTextColumn Header="В наличии" Binding="{Binding Quantity}" Width="70"/>
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -107,15 +102,15 @@
                                  TextAlignment="Center" Margin="0,3,0,0"/>
                     </StackPanel>
 
-                    <Button Grid.Column="1" Content="➕ Добавить в заказ" 
+                    <Button Grid.Column="1" Content="➕ Добавить" 
                             Style="{StaticResource ActionButton}" Background="#28A745"
                             Click="AddToCart_Click" x:Name="btnAddToCart" IsEnabled="False"/>
                 </Grid>
             </Grid>
         </Border>
 
-        <!-- Правая панель - Корзина -->
-        <Border Grid.Column="1" Background="White" Margin="0,10,10,10" Padding="15">
+        <!-- Правая панель - корзина -->
+        <Border Grid.Column="1" Background="White" Margin="0,10,10,10" Padding="15" CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -126,17 +121,17 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="🛒 Корзина" FontSize="18" FontWeight="Bold" 
+                <TextBlock Grid.Row="0" Text="🛒 КОРЗИНА" FontSize="18" FontWeight="Bold" 
                            Foreground="#4361EE" Margin="0,0,0,15"/>
 
                 <ListBox x:Name="lstCart" Grid.Row="1" Margin="0,0,0,10">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource CartItemStyle}">
+                            <Border Background="#F8F9FA" Margin="5" Padding="10" CornerRadius="8">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="60"/>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
@@ -152,18 +147,18 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <Border Grid.Row="2" Background="#E9ECEF" Padding="15" Margin="0,5,0,5">
+                <Border Grid.Row="2" Background="#E9ECEF" Padding="15" Margin="0,5,0,5" CornerRadius="10">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Итого:" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="0" Text="ИТОГО:" FontSize="16" FontWeight="Bold"/>
                         <TextBlock x:Name="txtTotal" Grid.Column="1" FontSize="20" FontWeight="Bold" Foreground="#28A745"/>
                     </Grid>
                 </Border>
 
-                <GroupBox Grid.Row="3" Header="👤 Данные получателя" Margin="0,10,0,10">
+                <GroupBox Grid.Row="3" Header="👤 ДАННЫЕ ПОЛУЧАТЕЛЯ" Margin="0,10,0,10">
                     <StackPanel Margin="10">
                         <TextBlock Text="ФИО*" FontSize="12" FontWeight="SemiBold" Margin="0,5,0,5"/>
                         <TextBox x:Name="txtCustomerName" Style="{StaticResource ModernTextBox}" Height="30"/>
@@ -176,7 +171,7 @@
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Grid.Row="4" Header="💳 Способ оплаты" Margin="0,10,0,10">
+                <GroupBox Grid.Row="4" Header="💳 СПОСОБ ОПЛАТЫ" Margin="0,10,0,10">
                     <StackPanel Margin="10">
                         <RadioButton x:Name="rbCard" Content="💳 Банковская карта" IsChecked="True" Margin="0,5"/>
                         <RadioButton x:Name="rbCash" Content="💰 Наличные" Margin="0,5"/>
@@ -185,12 +180,9 @@
                 </GroupBox>
 
                 <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-                    <Button Content="🗑️ Очистить корзину" Style="{StaticResource DangerButton}" 
-                            Click="ClearCart_Click"/>
-                    <Button Content="✅ Оформить заказ" Style="{StaticResource SuccessButton}" 
-                            Click="SubmitOrder_Click"/>
-                    <Button Content="❌ Отмена" Style="{StaticResource ActionButton}" 
-                            Background="#6C757D" Click="Cancel_Click"/>
+                    <Button Content="🗑️ Очистить" Style="{StaticResource DangerButton}" Click="ClearCart_Click"/>
+                    <Button Content="✅ Оформить" Style="{StaticResource SuccessButton}" Click="SubmitOrder_Click"/>
+                    <Button Content="❌ Отмена" Style="{StaticResource ActionButton}" Background="#6C757D" Click="Cancel_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
